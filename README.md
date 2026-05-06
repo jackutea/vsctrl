@@ -1,9 +1,6 @@
 # VS Code Copilot LAN Bridge
 
-支持两种实现：
-
-- `Node.js + TypeScript`（推荐，默认入口）
-- `PowerShell`（保留兼容实现）
+当前仅保留 `Node.js + TypeScript` 实现。
 
 统一提供这些路由：
 
@@ -53,16 +50,7 @@ npm run build
 node dist\server.js --port 8787 --bindHost + --token your-strong-token
 ```
 
-## 3. PowerShell 兼容实现（可选）
-
-如果你仍想使用原来的 PowerShell 实现：
-
-```powershell
-Set-Location e:\vsctrl
-powershell -ExecutionPolicy Bypass -File .\copilot-lan-bridge.ps1 -Port 8787 -BindHost "+" -Token "your-strong-token" -ChatHotkey "^%i"
-```
-
-## 4. 手机调用示例
+## 3. 手机调用示例
 
 假设电脑局域网 IP 是 `192.168.1.100`。
 
@@ -94,15 +82,15 @@ curl -X POST "http://192.168.1.100:8787/continue" \
   -H "X-Bridge-Token: your-strong-token"
 ```
 
-## 5. 重要限制
+## 4. 重要限制
 
-无论是 Node 版还是 PowerShell 版，本质都依赖 Windows 桌面自动化把文本发到 VS Code：
+当前实现依赖 Windows 桌面自动化把文本发到 VS Code：
 
 - 需要保持 Windows 已登录桌面（不能锁屏）
 - 发送时 VS Code 会被切到前台
 - 依赖你本机 Copilot Chat 快捷键可用
 
-## 6. 常见问题
+## 5. 常见问题
 
 - Q: 无法访问服务
 - A: 检查防火墙是否放行 `8787` 端口
