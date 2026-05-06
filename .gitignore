@@ -1,2 +1,4 @@
 bridge-access.log
 qrcode.png
+node_modules/
+dist/

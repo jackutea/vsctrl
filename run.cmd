@@ -2,9 +2,25 @@
 setlocal
 
 cd /d "%~dp0"
-echo Starting Copilot LAN Bridge (default port, no auth)...
+where node >nul 2>nul
+if errorlevel 1 (
+	echo [ERROR] Node.js not found. Please install Node.js 20+ first.
+	exit /b 1
+)
+
+if not exist "%~dp0node_modules" (
+	echo Installing dependencies...
+	call npm install
+	if errorlevel 1 exit /b 1
+)
+
+echo Building TypeScript...
+call npm run build
+if errorlevel 1 exit /b 1
+
+echo Starting Copilot LAN Bridge (Node.js TypeScript, default no auth)...
 echo Trying LAN bind first: http://YOUR-LAN-IP:8787/
+node "%~dp0dist\server.js" --port 8787 --bindHost + --noAuth %*
 
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0copilot-lan-bridge.ps1" -NoAuth
-
-endlocal
+set "EXITCODE=%ERRORLEVEL%"
+endlocal & exit /b %EXITCODE%
