@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Copilot LAN Control</title>
+  <style>
+    :root {
+      --bg0: #081a2b;
+      --bg1: #0e2f4f;
+      --bg2: #1e4f7b;
+      --ink: #eaf4ff;
+      --muted: #bdd2e8;
+      --card: rgba(9, 23, 40, 0.72);
+      --line: rgba(168, 208, 255, 0.35);
+      --ok: #66f0b2;
+      --warn: #ffd36a;
+      --err: #ff8f8f;
+      --accent: #7dd2ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      color: var(--ink);
+      font-family: "Trebuchet MS", "Lucida Sans Unicode", "Century Gothic", sans-serif;
+      background:
+        radial-gradient(900px 600px at 0% -10%, rgba(95, 168, 255, 0.35), transparent 60%),
+        radial-gradient(700px 500px at 110% 10%, rgba(88, 255, 220, 0.18), transparent 60%),
+        linear-gradient(140deg, var(--bg0), var(--bg1) 45%, var(--bg2));
+    }
+
+    .wrap {
+      width: min(760px, 100% - 24px);
+      margin: 22px auto 28px;
+      animation: rise 500ms ease-out both;
+    }
+
+    .hero {
+      margin-bottom: 14px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(160deg, rgba(8, 27, 46, 0.8), rgba(23, 57, 87, 0.52));
+      backdrop-filter: blur(8px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.3rem, 3.6vw, 2rem);
+      letter-spacing: 0.4px;
+    }
+
+    .hint {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--card);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      letter-spacing: 0.2px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(164, 211, 255, 0.42);
+      background: rgba(7, 21, 34, 0.7);
+      color: var(--ink);
+      padding: 10px 12px;
+      font: inherit;
+    }
+
+    input:focus, textarea:focus {
+      outline: 2px solid rgba(125, 210, 255, 0.7);
+      outline-offset: 1px;
+    }
+
+    textarea {
+      min-height: 108px;
+      resize: vertical;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .quick-btn {
+      background: linear-gradient(180deg, rgba(57, 139, 182, 0.62), rgba(20, 74, 111, 0.82));
+      font-weight: 500;
+      font-size: 0.94rem;
+    }
+
+    button {
+      cursor: pointer;
+      border: 1px solid rgba(164, 211, 255, 0.55);
+      background: linear-gradient(180deg, rgba(47, 122, 173, 0.75), rgba(19, 67, 106, 0.85));
+      transition: transform 120ms ease, box-shadow 120ms ease;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.28);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .status {
+      font-size: 0.9rem;
+      padding: 8px 2px 0;
+      min-height: 1.2rem;
+    }
+
+    .status.ok { color: var(--ok); }
+    .status.warn { color: var(--warn); }
+    .status.err { color: var(--err); }
+
+    pre {
+      margin: 0;
+      padding: 12px;
+      border-top: 1px solid rgba(164, 211, 255, 0.22);
+      background: rgba(3, 12, 20, 0.66);
+      max-height: 220px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #cfe9ff;
+      font-size: 0.85rem;
+      line-height: 1.35;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .actions {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <h1>Copilot LAN Control</h1>
+      <p class="hint">Mobile panel for chat and continue commands.</p>
+    </section>
+
+    <section class="card">
+      <div class="grid">
+        <div>
+          <label for="token">Token</label>
+          <input id="token" type="password" placeholder="bridge token">
+        </div>
+
+        <div>
+          <label for="message">Message</label>
+          <textarea id="message" placeholder="Type a request for Copilot Chat..."></textarea>
+        </div>
+
+        <div>
+          <label>Quick Prompts</label>
+          <div id="quickPrompts" class="quick-grid"></div>
+        </div>
+
+        <div class="actions">
+          <button id="sendBtn" type="button">Send Chat</button>
+          <button id="continueBtn" type="button">Continue</button>
+          <button id="healthBtn" type="button">Health</button>
+          <button id="logsBtn" type="button">Logs</button>
+        </div>
+
+        <div id="status" class="status">Ready.</div>
+      </div>
+      <pre id="output">No response yet.</pre>
+    </section>
+  </main>
+
+  <script>
+    const tokenInput = document.getElementById("token");
+    const messageInput = document.getElementById("message");
+    const statusNode = document.getElementById("status");
+    const outputNode = document.getElementById("output");
+    const sendBtn = document.getElementById("sendBtn");
+    const continueBtn = document.getElementById("continueBtn");
+    const healthBtn = document.getElementById("healthBtn");
+    const logsBtn = document.getElementById("logsBtn");
+    const quickPromptsNode = document.getElementById("quickPrompts");
+
+    const QUICK_PROMPTS = [
+      "Summarize the current file.",
+      "Explain this error and provide a fix.",
+      "Refactor this code for readability.",
+      "Write tests for this function.",
+      "Continue from your last answer.",
+      "List the next three implementation steps."
+    ];
+
+    const TOKEN_KEY = "copilot_lan_bridge_token";
+    tokenInput.value = localStorage.getItem(TOKEN_KEY) || "";
+
+    tokenInput.addEventListener("change", () => {
+      localStorage.setItem(TOKEN_KEY, tokenInput.value.trim());
+    });
+
+    function setStatus(text, level) {
+      statusNode.textContent = text;
+      statusNode.className = "status " + (level || "");
+    }
+
+    function printPayload(payload) {
+      outputNode.textContent = typeof payload === "string"
+        ? payload
+        : JSON.stringify(payload, null, 2);
+    }
+
+    function renderQuickPrompts() {
+      quickPromptsNode.innerHTML = "";
+      QUICK_PROMPTS.forEach((text) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "quick-btn";
+        btn.textContent = text;
+        btn.addEventListener("click", () => {
+          messageInput.value = text;
+          sendBtn.click();
+        });
+        quickPromptsNode.appendChild(btn);
+      });
+    }
+
+    async function callApi(path, method, body) {
+      const token = tokenInput.value.trim();
+      if (!token) {
+        setStatus("Token required.", "warn");
+        return;
+      }
+
+      localStorage.setItem(TOKEN_KEY, token);
+      const headers = {
+        "X-Bridge-Token": token
+      };
+
+      const options = {
+        method,
+        headers
+      };
+
+      if (body) {
+        headers["Content-Type"] = "application/json";
+        options.body = JSON.stringify(body);
+      }
+
+      setStatus("Sending...", "");
+      try {
+        const res = await fetch(path, options);
+        const text = await res.text();
+        let parsed = text;
+        try {
+          parsed = JSON.parse(text);
+        } catch (_) {
+        }
+
+        printPayload(parsed);
+        if (res.ok) {
+          setStatus("Done (" + res.status + ")", "ok");
+        } else {
+          setStatus("Request failed (" + res.status + ")", "err");
+        }
+      } catch (err) {
+        printPayload(String(err));
+        setStatus("Network error", "err");
+      }
+    }
+
+    sendBtn.addEventListener("click", () => {
+      const text = messageInput.value.trim();
+      if (!text) {
+        setStatus("Message required.", "warn");
+        return;
+      }
+      callApi("/chat", "POST", { text });
+    });
+
+    continueBtn.addEventListener("click", () => {
+      callApi("/continue", "POST");
+    });
+
+    healthBtn.addEventListener("click", async () => {
+      setStatus("Checking health...", "");
+      try {
+        const res = await fetch("/health");
+        const payload = await res.json();
+        printPayload(payload);
+        setStatus(res.ok ? "Healthy" : "Unhealthy", res.ok ? "ok" : "err");
+      } catch (err) {
+        printPayload(String(err));
+        setStatus("Health check failed", "err");
+      }
+    });
+
+    logsBtn.addEventListener("click", () => {
+      const token = tokenInput.value.trim();
+      if (!token) {
+        setStatus("Token required before opening logs.", "warn");
+        return;
+      }
+
+      const url = "/logs?token=" + encodeURIComponent(token);
+      window.open(url, "_blank", "noopener,noreferrer");
+    });
+
+    messageInput.addEventListener("keydown", (evt) => {
+      if ((evt.ctrlKey || evt.metaKey) && evt.key === "Enter") {
+        sendBtn.click();
+      }
+    });
+
+    // renderQuickPrompts();
+  </script>
+</body>
+</html>
