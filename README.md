@@ -2,6 +2,8 @@
 
 当前仅保留 `Node.js + TypeScript` 实现。
 
+前端文件位于 `frontend/` 目录（当前面板文件为 `frontend/panel.html`）。
+
 统一提供这些路由：
 
 - `/`：手机控制面板（网页）

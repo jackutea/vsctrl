@@ -13,7 +13,7 @@ interface BridgeConfig {
 }
 
 const rootDir = process.cwd();
-const panelPath = join(rootDir, "panel.html");
+const panelPath = join(rootDir, "frontend", "panel.html");
 const logPath = join(rootDir, "bridge-access.log");
 
 const config = parseArgs(process.argv.slice(2));
@@ -370,7 +370,7 @@ const server = createServer(async (req, res) => {
 
     if (pathName === "/") {
       if (!existsSync(panelPath)) {
-        writeText(res, 500, "text/plain; charset=utf-8", "panel.html not found");
+        writeText(res, 500, "text/plain; charset=utf-8", "frontend/panel.html not found");
         appendAccessLog(req, pathName, 500, "panel missing");
         return;
       }
